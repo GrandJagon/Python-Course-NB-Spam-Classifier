@@ -72,47 +72,33 @@ train_data_shuffled = total_train_data.sample(frac=1).reset_index(drop=True)
 
 correct_outputs = 0
 
-messages = train_data_shuffled['message']
-messages_count = vectorizer.transform(messages)
-targets = train_data_shuffled['classification'].values
-predictions = classifier.predict(messages_count)
 
-for i in range(len(predictions)):
-    if targets[i] == predictions[i]:
-        correct_outputs += 1
-          
-accuracy = correct_outputs / len(predictions)
+spam_count = Counter()
+ham_count = Counter()
 
-print(str(correct_outputs)+ ' predicted out of '+str(len(predictions))+',    accuracy - >'+str(accuracy))
-    
+spam_count.fit_set(spams_train['message'], 'spam')
+ham_count.fit_set(hams_train['message'], 'ham')
 
+classifier = Classifier(spam_count, ham_count)
 
-# spam_count = Counter()
-# ham_count = Counter()
+spams_train_shuffled = spams_train.sample(frac=1).reset_index(drop=True)
+hams_train_shuffled = hams_train.sample(frac=1).reset_index(drop=True)
+total_train_data_shuffled = total_train_data.sample(frac=1).reset_index(drop=True)
 
-# spam_count.fit_set(spams_train['message'], 'spam')
-# ham_count.fit_set(hams_train['message'], 'ham')
+total_test_data_shuffled = total_test_data.sample(frac=1).reset_index(drop=True)
 
-# classifier = Classifier(spam_count, ham_count)
-
-# spams_train_shuffled = spams_train.sample(frac=1).reset_index(drop=True)
-# hams_train_shuffled = hams_train.sample(frac=1).reset_index(drop=True)
-# total_train_data_shuffled = total_train_data.sample(frac=1).reset_index(drop=True)
-
-# total_test_data_shuffled = total_test_data.sample(frac=1).reset_index(drop=True)
-
-# print("----------------------------TRAINING---------------------------------")
-# print("ALL DATA SET ->")
-# classifier.evaluate_data_set(total_train_data_shuffled)
-# print("SPAMS DATA SET")
-# classifier.evaluate_data_set(spams_train_shuffled)
-# print("HAMS DATA SET")
-# classifier.evaluate_data_set(hams_train_shuffled)
-# print("-----------------------------TEST-------------------------------------")
-# print("ALL DATA SET ->")
-# classifier.evaluate_data_set(total_test_data_shuffled)
-# print("SPAMS DATA SET")
-# classifier.evaluate_data_set(spams_test)
-# print("HAMS DATA SET")
-# classifier.evaluate_data_set(hams_test)
+print("----------------------------TRAINING---------------------------------")
+print("ALL DATA SET ->")
+classifier.evaluate_data_set(total_train_data_shuffled)
+print("SPAMS DATA SET")
+classifier.evaluate_data_set(spams_train_shuffled)
+print("HAMS DATA SET")
+classifier.evaluate_data_set(hams_train_shuffled)
+print("-----------------------------TEST-------------------------------------")
+print("ALL DATA SET ->")
+classifier.evaluate_data_set(total_test_data_shuffled)
+print("SPAMS DATA SET")
+classifier.evaluate_data_set(spams_test)
+print("HAMS DATA SET")
+classifier.evaluate_data_set(hams_test)
 

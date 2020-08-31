@@ -16,7 +16,7 @@ class Counter:
         self.size = 0
         
         # Variable that will define how many words are tken into account for the vocabulary
-        self.awo = 105
+        self.awo = 1000
         
         for i in range(0, self.awo):
             self.recurrent_words.append(['',0])
@@ -40,35 +40,30 @@ class Counter:
                     self.words += 1
         temp.sort()
         
-        # Each word is stored in a dict in a form {'word' : [index, occurence]} and in a list of occurences sorted
-        # by index
-        index = 0
+        # Each word is stored in a vocabulary dict in a form {'word' : occurences} 
         for i in range(len(temp)):
             if temp[i] in self.voc:
-                self.voc[temp[i]][1] += 1
-                self.occurences[self.voc[temp[i]][0]] += 1
+                self.voc[temp[i]] += 1
             else:
-                self.voc[temp[i]] = [index, 1]
-                self.occurences.append(1)
-                index += 1
-                
-          
-    #Function parsing the words and returning the self.owa  with the most occurences
+                self.voc[temp[i]] = 1
+       
+        
+    #Function parsing the words and returning the words with the most occurences in a range [0, self.owa]
     def get_recurrent_words(self):
          if self.recurrent_words[0][0] == '':
             for key in self.voc.keys():
                 for a in range(0, self.awo):
-                    if self.voc[key][1] >= self.recurrent_words[(self.awo - 1) - a][1]:
-                        if self.voc[key][1] > self.recurrent_words[(self.awo - 2)  - a][1]:
+                    if self.voc[key] >= self.recurrent_words[(self.awo - 1) - a][1]:
+                        if self.voc[key] > self.recurrent_words[(self.awo - 2)  - a][1]:
                             if a == (self.awo - 1) :
                                 self.recurrent_words[(self.awo - 1)  - a][0] = key
-                                self.recurrent_words[(self.awo - 1)  - a][1] = self.voc[key][1]   
+                                self.recurrent_words[(self.awo - 1)  - a][1] = self.voc[key]  
                             pass
                         else:
                             for i in range(0, a):
                                 self.recurrent_words.insert(self.awo - a, self.recurrent_words.pop((self.awo - 1) - a)) 
                             self.recurrent_words[(self.awo - 1)  - a][0] = key
-                            self.recurrent_words[(self.awo - 1)  - a][1] = self.voc[key][1]
+                            self.recurrent_words[(self.awo - 1)  - a][1] = self.voc[key]
                             break
                   
          return self.recurrent_words

@@ -7,7 +7,7 @@ import unicodedata
 
 class Classifier():
     
-    #Constructor that takes the two sets as class of set A to be found according to the most used words of set A
+    #Constructor taking an instance of word_count.py for each set and initializing all values necessary for probabilities calculations
     def __init__(self, count_set_A, count_set_B):
         self.count_set_A = count_set_A
         self.class_A = count_set_A.get_classification()
@@ -15,23 +15,26 @@ class Classifier():
         self.count_set_B = count_set_B
         self.class_B = count_set_B.get_classification()
         
-        self.voc = {}
+        # Recurrent words for set A extracted and stored in a dict in order to be able to check if they are present in messages
+        self.recurrent_words_A = {}
         for item in self.count_set_A.get_recurrent_words():
-            self.voc[item[0]] = item[1]
+            self.recurrent_words_A[item[0]] = item[1]
+            
+            
+        self.voc_A = count_set_A.get_voc()
+        self.voc_B = count_set_B.get_voc()
+        
         
         self.size_A = self.count_set_A.get_size()
         self.words_A = self.count_set_A.get_words()
         self.size_B = self.count_set_B.get_size()
         self.words_B = self.count_set_B.get_words()
         
-        self.total_set_voc = {** self.count_set_A.get_voc(), ** self.count_set_B.get_voc()}
         self.total_set_size = self.size_A + self.size_B
         
         self.prob_A = self.size_A / self.total_set_size
         self.prob_B = self.size_B / self.total_set_size
-        
  
-        
                 
     
     #Function that evaluates messages individually and returns the prediction as the classification for set A or B
@@ -44,15 +47,12 @@ class Classifier():
             word = re.sub('\n','', word)
             word = re.sub('\t','', word)
             word = unicodedata.normalize("NFKD", word)   
-            if word.lower() in self.voc.keys():
-                if word.lower() in matches:
-                    matches[word.lower()][0] += 1
+            if word.lower() in self.recurrent_words_A.keys():
+                tempA = tempA * (self.recurrent_words_A[word.lower()] / self.words_A)
+                if word.lower() in self.voc_B.keys():
+                    tempB = tempB * (self.voc_B[word.lower()] / self.words_B)
                 else:
-                    matches[word.lower()] = [1 , self.voc[word.lower()]]
-        
-        for item in matches.keys():
-            tempA = tempA * ((matches[item][0] + 1)/self.words_A)
-            tempB = tempB * ((matches[item][0] + 1)/self.words_B)                
+                    tempB = tempB * (1 / self.total_set_size)            
             
         prob_a = tempA * self.prob_A
         prob_b = tempB * self.prob_B
@@ -61,6 +61,8 @@ class Classifier():
             return self.class_A
         else:
             return self.class_B
+        
+        
             
     
     def evaluate_data_set(self, dataset):
